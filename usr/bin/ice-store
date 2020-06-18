@@ -6,25 +6,48 @@ from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository.GdkPixbuf import Pixbuf
 import os
+import argparse, sys
 import subprocess
 from urllib.request import urlopen
 import json
 
+usingAltRepo = False
+
+#Check for arguments
+if len(sys.argv) > 1:
+		parser = argparse.ArgumentParser(description='Use a seperate repository with the ice store')
+		parser.add_argument('text', action='store', type=str, help='The repo(clone link) to use.')
+		args = parser.parse_args()
+		newRepo = args.text
+		usingAltRepo = True
+
 home = os.getenv("HOME")
 iceStoreDir = "{0}/.local/share/ice-store".format(home)
-
-if os.path.isdir(iceStoreDir) == False: 
-	os.makedirs(iceStoreDir)
-	os.chdir(iceStoreDir)
-	git = subprocess.Popen(["git", "clone", "https://github.com/borderOS/iceStoreRepo", "."])
-else: 
-	os.chdir(iceStoreDir)
-	git = subprocess.Popen(["git", "pull", "https://github.com/borderOS/iceStoreRepo"])
+#Check if using seperate repository
+if usingAltRepo == False:
+	if os.path.isdir(iceStoreDir) == False:
+		os.makedirs(iceStoreDir)
+		os.chdir(iceStoreDir)
+		git = subprocess.Popen(["git", "clone", "https://github.com/borderOS/iceStoreRepo", "."])
+	else:
+		os.chdir(iceStoreDir)
+		git = subprocess.Popen(["git", "pull", "https://github.com/borderOS/iceStoreRepo"])
+else:
+	#Clone specified repository
+	if os.path.isdir(iceStoreDir) == False:
+		os.makedirs(iceStoreDir)
+		os.chdir(iceStoreDir)
+		git = subprocess.Popen(["git", "clone", newRepo, "."])
+	else:
+		os.makedirs(iceStoreDir)
+		os.system("rm -rf "+iceStoreDir)
+		os.chdir(iceStoreDir)
+		git = subprocess.Popen(["git", "pull", newRepo])
 
 git.wait()
 
 class iceStore(Gtk.Window):
-	
+
 	# The Window
 	def __init__(self):
 
@@ -43,63 +66,63 @@ class iceStore(Gtk.Window):
 		self.featuredList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.featuredScroll = Gtk.ScrolledWindow()
 		self.featuredScroll.add(self.featuredList)
-		self.catagories.append_page(self.featuredScroll) 
+		self.catagories.append_page(self.featuredScroll)
 		self.catagories.set_tab_label_text(self.featuredScroll, "Featured")
 
 		self.accessoriesList = Gtk.ListBox()
 		self.accessoriesList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.accessoriesScroll = Gtk.ScrolledWindow()
 		self.accessoriesScroll.add(self.accessoriesList)
-		self.catagories.append_page(self.accessoriesScroll) 
+		self.catagories.append_page(self.accessoriesScroll)
 		self.catagories.set_tab_label_text(self.accessoriesScroll, "Accessories")
 
 		self.gamesList = Gtk.ListBox()
 		self.gamesList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.gamesScroll = Gtk.ScrolledWindow()
 		self.gamesScroll.add(self.gamesList)
-		self.catagories.append_page(self.gamesScroll) 
+		self.catagories.append_page(self.gamesScroll)
 		self.catagories.set_tab_label_text(self.gamesScroll, "Games")
 
 		self.graphicsList = Gtk.ListBox()
 		self.graphicsList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.graphicsScroll = Gtk.ScrolledWindow()
 		self.graphicsScroll.add(self.graphicsList)
-		self.catagories.append_page(self.graphicsScroll) 
+		self.catagories.append_page(self.graphicsScroll)
 		self.catagories.set_tab_label_text(self.graphicsScroll, "Graphics")
 
 		self.internetList = Gtk.ListBox()
 		self.internetList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.internetScroll = Gtk.ScrolledWindow()
 		self.internetScroll.add(self.internetList)
-		self.catagories.append_page(self.internetScroll) 
+		self.catagories.append_page(self.internetScroll)
 		self.catagories.set_tab_label_text(self.internetScroll, "Internet")
 
 		self.multimediaList = Gtk.ListBox()
 		self.multimediaList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.multimediaScroll = Gtk.ScrolledWindow()
 		self.multimediaScroll.add(self.multimediaList)
-		self.catagories.append_page(self.multimediaScroll) 
+		self.catagories.append_page(self.multimediaScroll)
 		self.catagories.set_tab_label_text(self.multimediaScroll, "Multimedia")
 
 		self.officeList = Gtk.ListBox()
 		self.officeList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.officeScroll = Gtk.ScrolledWindow()
 		self.officeScroll.add(self.officeList)
-		self.catagories.append_page(self.officeScroll) 
+		self.catagories.append_page(self.officeScroll)
 		self.catagories.set_tab_label_text(self.officeScroll, "Office")
 
 		self.programmingList = Gtk.ListBox()
 		self.programmingList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.programmingScroll = Gtk.ScrolledWindow()
 		self.programmingScroll.add(self.programmingList)
-		self.catagories.append_page(self.programmingScroll) 
+		self.catagories.append_page(self.programmingScroll)
 		self.catagories.set_tab_label_text(self.programmingScroll, "Programming")
 
 		self.systemList = Gtk.ListBox()
 		self.systemList.set_selection_mode(Gtk.SelectionMode.NONE)
 		self.systemScroll = Gtk.ScrolledWindow()
 		self.systemScroll.add(self.systemList)
-		self.catagories.append_page(self.systemScroll) 
+		self.catagories.append_page(self.systemScroll)
 		self.catagories.set_tab_label_text(self.systemScroll, "System")
 
 		with open("repo.json") as icerepo:
@@ -171,3 +194,6 @@ mainWindow = iceStore()
 mainWindow.connect("delete-event", Gtk.main_quit) # Makes the close button close the Window.
 mainWindow.show_all()
 Gtk.main()
+#Remove files from seperate repository to stop unwanted persistence
+if usingAltRepo:
+	os.system("rm -rf "+iceStoreDir)
